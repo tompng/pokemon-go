@@ -44,8 +44,12 @@ func NewImageBufferFromFile(fileName string) *ImageBuffer {
 	for x := 0; x < image.Width; x++ {
 		for y := 0; y < image.Height; y++ {
 			r, g, b, a := img.At(x, y).RGBA()
-			image.Gray[y][x] = float64(r+g+b) / 3 / 0xffff
-			image.Alpha[y][x] = float64(a) / 0xffff
+			alpha := float64(a) / 0xffff
+			gray := float64(r+g+b) / 3 / 0xffff
+			image.Alpha[y][x] = alpha
+			if alpha > 0 {
+				image.Gray[y][x] = gray / alpha
+			}
 		}
 	}
 	return image
@@ -90,7 +94,7 @@ func (image *ImageBuffer) Plot(x, y int, gray, alpha float64) {
 	}
 }
 func (screen *ImageBuffer) Draw(image Image, x, y, w, h float64) {
-	if x + w < 0 || y + h < 0 || float64(screen.Width) < x || float64(screen.Height) < y {
+	if x+w < 0 || y+h < 0 || float64(screen.Width) < x || float64(screen.Height) < y {
 		return
 	}
 	for ix := int(x); float64(ix) < x+w; ix++ {
