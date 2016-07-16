@@ -6,6 +6,8 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 	"unsafe"
@@ -23,8 +25,44 @@ func DrawString(screen *canvas.ImageBuffer, message string, x, y, size float64) 
 	}
 }
 
+func FileNames(path string) []string {
+	fileInfos, err := ioutil.ReadDir(path)
+	if err != nil {
+		return []string{}
+	}
+	files := make([]string, len(fileInfos))
+	for i, fi := range fileInfos {
+		file := fi.Name()
+		if fi.IsDir() {
+			file += "/"
+		}
+		files[i] = file
+	}
+	return files
+}
+
 func PokemonImage() *canvas.ImageBuffer {
-	return canvas.NewImageBufferFromFile("images/pokemon/gopher.png")
+	currentPath, err := filepath.Abs(".")
+	if err != nil {
+		panic("cannot get current path")
+	}
+	path := "images/pokemon/"
+	allFiles := FileNames(path)
+	imageFiles := make([]string, len(allFiles))
+	imageNum := 0
+	for _, file := range allFiles {
+		if strings.HasSuffix(file, ".png") {
+			imageFiles[imageNum] = file
+			imageNum++
+		}
+	}
+	var seed int64
+	for i, c := range currentPath {
+		seed = seed*0x987654321 + int64(c) + int64(i)
+	}
+	random := rand.New(rand.NewSource(seed))
+	file := imageFiles[random.Intn(imageNum)]
+	return canvas.NewImageBufferFromFile(path + file)
 }
 
 func DrawScrollingMessages(screen *canvas.ImageBuffer, messages []string, time float64) {
@@ -72,14 +110,15 @@ func Save(pokemon canvas.Image) {
 	DrawGotcha(screen)
 	ioutil.WriteFile("pokemon.txt", []byte(screen.String()), os.ModePerm)
 }
+
 func main() {
 	ball1 := canvas.NewImageBufferFromFile("images/ball1.png")
 	smoke := canvas.NewImageBufferFromFile("images/smoke.png")
 	ball2 := canvas.NewImageBufferFromFile("images/ball2.png")
 	ball3 := canvas.NewImageBufferFromFile("images/ball3.png")
-	pokemon := PokemonImage()
 
-	messages := []string{"foo", "bar", "hoge", "piyo"}
+	fileNames := FileNames(".")
+	pokemon := PokemonImage()
 
 	time0 := time.Now().UnixNano()
 	rand.Seed(time0)
@@ -117,7 +156,7 @@ func main() {
 		if t < getTime+throwTime {
 			screen.Draw(pokemon, float64(screen.Width)*x-size/2, float64(screen.Height)*y-size/2, size, size)
 		}
-		DrawScrollingMessages(screen, messages, t)
+		DrawScrollingMessages(screen, fileNames, t)
 
 		if getTime < t {
 			phase := t - getTime
