@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -13,11 +14,32 @@ import (
 	"unsafe"
 )
 
+var resourceDir string
+
+func ResourceDir() string {
+	dir, err := filepath.Abs(path.Dir(os.Args[0]))
+	_, err = os.Stat(dir + "/images/chars.png")
+	if err == nil {
+		return dir + "/images/"
+	}
+	_, err = os.Stat("images/chars.png")
+	if err == nil {
+		return "images/"
+	}
+	panic("unable to find resource directory")
+}
+func ResourcePath(path string) string {
+	if len(resourceDir) == 0 {
+		resourceDir = ResourceDir()
+	}
+	return resourceDir + path
+}
+
 var fontData *canvas.ImageBuffer
 
 func DrawString(screen *canvas.ImageBuffer, message string, x, y, size float64) {
 	if fontData == nil {
-		fontData = canvas.NewImageBufferFromFile("images/chars.png")
+		fontData = canvas.NewImageBufferFromFile(ResourcePath("chars.png"))
 	}
 	for i, c := range message {
 		face := fontData.Sub(float64(c%16)/16.0, float64(c/16)/8.0, 1/16.0, 1/8.0)
@@ -46,7 +68,7 @@ func PokemonImage() *canvas.ImageBuffer {
 	if err != nil {
 		panic("cannot get current path")
 	}
-	path := "images/pokemon/"
+	path := ResourcePath("pokemon/")
 	allFiles := FileNames(path)
 	imageFiles := make([]string, len(allFiles))
 	imageNum := 0
@@ -112,10 +134,10 @@ func Save(pokemon canvas.Image) {
 }
 
 func main() {
-	ball1 := canvas.NewImageBufferFromFile("images/ball1.png")
-	smoke := canvas.NewImageBufferFromFile("images/smoke.png")
-	ball2 := canvas.NewImageBufferFromFile("images/ball2.png")
-	ball3 := canvas.NewImageBufferFromFile("images/ball3.png")
+	ball1 := canvas.NewImageBufferFromFile(ResourcePath("ball1.png"))
+	smoke := canvas.NewImageBufferFromFile(ResourcePath("smoke.png"))
+	ball2 := canvas.NewImageBufferFromFile(ResourcePath("ball2.png"))
+	ball3 := canvas.NewImageBufferFromFile(ResourcePath("ball3.png"))
 
 	fileNames := FileNames(".")
 	pokemon := PokemonImage()
