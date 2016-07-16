@@ -1,0 +1,27 @@
+<script>
+onload=function(){
+  canvas=document.createElement('canvas');
+  document.body.innerHTML='';
+  var w=16;h=32;font=24;yoffset=-0.05;
+  canvas.width=w*16;
+  canvas.height=h*8;
+  g=canvas.getContext('2d');
+  g.fillStyle='black'
+  for(var i=0;i<128;i++){
+    g.save();
+    var x=i%16,y=(i-x)/16;
+    g.beginPath()
+    g.rect(x*w,y*h,w,h);
+    g.clip();
+    g.translate(w*x+w/2, h*y+h/2+yoffset*h);
+    g.scale(0.1,0.1);
+    g.font='bold '+font*10+'px Monaco'
+    g.textAlign='center'
+    g.textBaseline='middle'
+    g.fillText(String.fromCharCode(i),0,0)
+    g.restore();
+  }
+  img=new Image();img.src=canvas.toDataURL()
+  document.body.appendChild(img);
+}
+</script>
