@@ -3,9 +3,14 @@ package main
 import (
 	"time"
 	"math"
+	"os"
 	"math/rand"
 	"./canvas"
+	"syscall"
+	"unsafe"
+	"fmt"
 )
+
 
 var fontData *canvas.ImageBuffer
 func DrawString(screen *canvas.ImageBuffer, message string, x, y, size float64){
@@ -44,7 +49,20 @@ func DrawGotcha(screen *canvas.ImageBuffer){
 	DrawString(screen, message, float64(screen.Width-width)/2, float64(screen.Height-height), float64(height))
 }
 
+func GetWinSize() (int, int){
+	type WinSize struct {
+		H, W, _, _ int16
+	}
+	winsize := &WinSize{}
+	syscall.Syscall(syscall.SYS_IOCTL, os.Stdout.Fd(), uintptr(syscall.TIOCGWINSZ), uintptr(unsafe.Pointer(winsize)))
+	return int(winsize.W), int(winsize.H)
+}
+
 func main() {
+	if os.Stdin != nil {
+		fmt.Print(GetWinSize())
+		// return
+	}
   ball1 := canvas.NewImageBufferFromFile("images/ball1.png")
   smoke := canvas.NewImageBufferFromFile("images/smoke.png")
   ball2 := canvas.NewImageBufferFromFile("images/ball2.png")
@@ -62,8 +80,9 @@ func main() {
 	getTime := 4.0
 	throwTime := 1.0
 	for ;; {
+		terminalWidth, terminalHeight := GetWinSize()
 		t := float64(time.Now().UnixNano() - time0)/1000/1000/1000
-		screen := canvas.NewImageBuffer(80, 80)
+		screen := canvas.NewImageBuffer(terminalWidth, (terminalHeight-1)*2)
 
 		size := 96*(1-math.Exp(-t))*(1+0.1*(math.Sin(1.4*t)+math.Sin(1.9*t)))
 		x := dstx+dx1*math.Exp(-t)+dx2*math.Exp(-t/2)+0.1*(math.Sin(2.1*t)+math.Sin(1.7*t))
@@ -98,6 +117,8 @@ func main() {
 			screen.Draw(ball, float64(screen.Width)/2,(float64(screen.Height)/2+20)*(1-pos)-20, 20, 20)
 			if phase > 5 {
 				DrawGotcha(screen)
+				screen.Print()
+				break
 			}
 		}
 		screen.Print()
