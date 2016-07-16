@@ -1,8 +1,9 @@
 package main
 
 import (
-	"./canvas"
 	"fmt"
+	"time"
+	"./canvas"
 )
 
 var fontData *canvas.ImageBuffer
@@ -18,15 +19,21 @@ func PokemonImage() *canvas.ImageBuffer{
   return canvas.NewImageBufferFromFile("images/pokemon/gopher.png")
 }
 
+func DrawScrollingMessages(screen *canvas.ImageBuffer, messages []string, time float64){
+	for i, message := range messages {
+		DrawString(screen, message, 0, float64(i+1)*16 - 20*time, 16)
+	}
+}
 
 func main() {
 	image := canvas.NewImageBufferFromFile("images/ball1.png")
 	fmt.Print(image.Width)
-	screen := canvas.NewImageBuffer(80, 80)
+	// screen := canvas.NewImageBuffer(80, 80)
 	// screen.Draw(image.Sub(0.5, 0.5, 0.5, 0.5), 0, 0, 80, 80)
-	screen.Draw(image, 30, 50, 40, 40)
-  DrawString(screen, "hello", 0, 0, 20)
-	screen.Print()
+	// screen.Draw(image, 30, 50, 40, 40)
+  // DrawString(screen, "hello", 0, 0, 20)
+	// screen.Print()
+
 
   // ball1 := canvas.NewImageBufferFromFile("images/ball1.png")
   // smoke := canvas.NewImageBufferFromFile("images/smoke.png")
@@ -34,7 +41,18 @@ func main() {
   // ball3 := canvas.NewImageBufferFromFile("images/ball3.png")
   // pokemon := PokemonImage()
 	//
-  // messages := []string{"foo", "bar", "hoge", "piyo"}
+  messages := []string{"foo", "bar", "hoge", "piyo"}
 
+	time0 := time.Now().UnixNano()
+	for ;; {
+		t := float64(time.Now().UnixNano() - time0)/1000/1000/1000
+		screen := canvas.NewImageBuffer(80, 80)
+
+
+		DrawScrollingMessages(screen, messages, t)
+		screen.Print()
+		time.Sleep(50*time.Millisecond)
+	}
+	fmt.Print(time0)
 
 }
