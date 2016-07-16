@@ -38,10 +38,10 @@ func main() {
 	// screen.Print()
 
 
-  // ball1 := canvas.NewImageBufferFromFile("images/ball1.png")
-  // smoke := canvas.NewImageBufferFromFile("images/smoke.png")
-  // ball2 := canvas.NewImageBufferFromFile("images/ball2.png")
-  // ball3 := canvas.NewImageBufferFromFile("images/ball3.png")
+  ball1 := canvas.NewImageBufferFromFile("images/ball1.png")
+  smoke := canvas.NewImageBufferFromFile("images/smoke.png")
+  ball2 := canvas.NewImageBufferFromFile("images/ball2.png")
+  ball3 := canvas.NewImageBufferFromFile("images/ball3.png")
   pokemon := PokemonImage()
 	//
   messages := []string{"foo", "bar", "hoge", "piyo"}
@@ -65,6 +65,32 @@ func main() {
 			screen.Draw(pokemon, float64(screen.Width)*x-size/2, float64(screen.Height)*y-size/2, size, size)
 		}
 		DrawScrollingMessages(screen, messages, t)
+
+		if getTime < t {
+			phase := t - getTime
+			if phase < throwTime {
+				x := size/4*(2*rand.Float64()-1)+float64(screen.Width)/2-size/2
+				y := size/4*(2*rand.Float64()-1)+float64(screen.Height)/2-size/2
+				screen.Draw(smoke, x, y, size, size)
+			}
+			yt := phase*2
+			if yt < 0.5 {
+				yt = 0.5
+			}
+			ytmod1 := yt - math.Floor(yt)
+			pos := 4*ytmod1*(1-ytmod1)*math.Exp(-math.Floor(yt))
+			if phase > 2 {
+				pos = 0
+			}
+			ball := ball1
+			if phase > 5 {
+				ball = ball3
+			} else if phase > 1 && phase - math.Floor(phase) < 0.1 {
+				ball = ball2
+			}
+			screen.Draw(ball, float64(screen.Width)/2,(float64(screen.Height)/2+20)*(1-pos)-20, 20, 20)
+		}
+
 
 		screen.Print()
 		time.Sleep(50*time.Millisecond)
