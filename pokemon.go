@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 	"math"
 	"math/rand"
@@ -27,23 +26,31 @@ func DrawScrollingMessages(screen *canvas.ImageBuffer, messages []string, time f
 	}
 }
 
+func DrawGotcha(screen *canvas.ImageBuffer){
+	message := "Gotcha!"
+	width := 80
+	length := len(message)
+	height := 2*width/length
+	r := 4.0
+	for x:= -int(r); x < width + int(r); x++ {
+		for y:= -int(r); y<height; y++{
+			dx, dy := 1.0, 1.0
+			if x < 0 {dx = 1.0 + float64(x)/r}
+			if x > width {dx = 1.0 - float64(x - width)/r}
+			if y < 0 {dy = 1.0 + float64(y)/r}
+			screen.Plot(screen.Width/2-width/2+x, screen.Height-height+y, 1, 0.8*dx*dy)
+		}
+	}
+	DrawString(screen, message, float64(screen.Width-width)/2, float64(screen.Height-height), float64(height))
+}
+
 func main() {
-	image := canvas.NewImageBufferFromFile("images/ball1.png")
-	fmt.Print(image.Width)
-
-	// screen := canvas.NewImageBuffer(80, 80)
-	// screen.Draw(image.Sub(0.5, 0.5, 0.5, 0.5), 0, 0, 80, 80)
-	// screen.Draw(image, 30, 50, 40, 40)
-  // DrawString(screen, "hello", 0, 0, 20)
-	// screen.Print()
-
-
   ball1 := canvas.NewImageBufferFromFile("images/ball1.png")
   smoke := canvas.NewImageBufferFromFile("images/smoke.png")
   ball2 := canvas.NewImageBufferFromFile("images/ball2.png")
   ball3 := canvas.NewImageBufferFromFile("images/ball3.png")
   pokemon := PokemonImage()
-	//
+
   messages := []string{"foo", "bar", "hoge", "piyo"}
 
 	time0 := time.Now().UnixNano()
@@ -89,12 +96,12 @@ func main() {
 				ball = ball2
 			}
 			screen.Draw(ball, float64(screen.Width)/2,(float64(screen.Height)/2+20)*(1-pos)-20, 20, 20)
+			if phase > 5 {
+				DrawGotcha(screen)
+			}
 		}
-
-
 		screen.Print()
 		time.Sleep(50*time.Millisecond)
 	}
-	fmt.Print(time0)
 
 }
