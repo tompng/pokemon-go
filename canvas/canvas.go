@@ -6,6 +6,7 @@ import (
 	"image"
 	_ "image/png"
 	"os"
+	"strings"
 )
 
 type Image interface {
@@ -104,9 +105,9 @@ func (screen *ImageBuffer) Draw(image Image, x, y, w, h float64) {
 		}
 	}
 }
-func (image *ImageBuffer) Print() {
-	for y := 0; y < (image.Height-1)/2; y++ {
-		fmt.Print("\n\x1B[", y+1, ";1H\x1B[K")
+func (image *ImageBuffer) String() string {
+	lines := make([]string, image.Height/2)
+	for y := 0; y < image.Height/2; y++ {
 		var buf bytes.Buffer
 		for x := 0; x < image.Width; x++ {
 			ug, ua := image.Gray[2*y][x], image.Alpha[2*y][x]
@@ -127,8 +128,12 @@ func (image *ImageBuffer) Print() {
 			}
 			buf.WriteByte(charTable[up][down])
 		}
-		fmt.Print(buf.String())
+		lines[y] = buf.String()
 	}
+	return strings.Join(lines, "\n")
+}
+func (image *ImageBuffer) Print() {
+	fmt.Print("\x1B[1;1H", image.String())
 }
 
 var charTable []string = []string{

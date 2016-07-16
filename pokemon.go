@@ -8,7 +8,7 @@ import (
 	"./canvas"
 	"syscall"
 	"unsafe"
-	"fmt"
+	"io/ioutil"
 )
 
 
@@ -58,11 +58,13 @@ func GetWinSize() (int, int){
 	return int(winsize.W), int(winsize.H)
 }
 
+func Save(pokemon canvas.Image){
+	screen := canvas.NewImageBuffer(80, 80)
+	screen.Draw(pokemon, 0, 0, 80, 80)
+	DrawGotcha(screen)
+	ioutil.WriteFile("pokemon.txt", []byte(screen.String()), os.ModePerm)
+}
 func main() {
-	if os.Stdin != nil {
-		fmt.Print(GetWinSize())
-		// return
-	}
   ball1 := canvas.NewImageBufferFromFile("images/ball1.png")
   smoke := canvas.NewImageBufferFromFile("images/smoke.png")
   ball2 := canvas.NewImageBufferFromFile("images/ball2.png")
@@ -77,11 +79,28 @@ func main() {
 	dstx, dsty := 0.5, 0.5
 	dx1, dy1 := 2*rand.Float64()-1, 2*rand.Float64()-1
 	dx2, dy2 := 2*rand.Float64()-1, 2*rand.Float64()-1
-	getTime := 4.0
+	getTime := 20.0
+	currentTime := func() float64{
+		return float64(time.Now().UnixNano() - time0)/1000/1000/1000
+	}
+
+	go func(){
+		for ;; {
+			os.Stdin.Read(make([]byte, 1))
+			time := currentTime()
+			if time < 2.0 {
+				time = 2.0
+			}
+			if time < getTime{
+				getTime = time
+			}
+		}
+	}()
+
 	throwTime := 1.0
 	for ;; {
 		terminalWidth, terminalHeight := GetWinSize()
-		t := float64(time.Now().UnixNano() - time0)/1000/1000/1000
+		t := currentTime()
 		screen := canvas.NewImageBuffer(terminalWidth, (terminalHeight-1)*2)
 
 		size := 96*(1-math.Exp(-t))*(1+0.1*(math.Sin(1.4*t)+math.Sin(1.9*t)))
@@ -118,6 +137,7 @@ func main() {
 			if phase > 5 {
 				DrawGotcha(screen)
 				screen.Print()
+				Save(pokemon)
 				break
 			}
 		}
