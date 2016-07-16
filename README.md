@@ -2,7 +2,7 @@
 
 ## Pokemons are hiding in your local directory
 ```
-$ go build pokemon.go; cd somewhere; path/to/pokemon
+$ go build -o pokemon-go pokemon.go; cd somewhere; path/to/pokemon-go
                                                   MQBTm             uuuu        
                             .,,.   ,.    ...      MY111         ,,@TmdddB       
   gMTTT                    pT**"   T*    *TM1      m11j7*~~~:?V::TTMQQQT     ,  
@@ -104,21 +104,21 @@ $ cat pokemon.txt
 # if you skip this step, only gopher will appear.
 
 # Build
-$ go build pokemon.go
+$ go build -o pokemon-go pokemon.go
 
 # Find pokemon! Type Enter to catch them!
-$ ./pokemon
+$ ./pokemon-go
 
 # Pokemon you caught will stay inside `./pokemon.txt`
 $ cat pokemon.txt
 
 # Change directory, and you will find another pokemon!
 $ cd somewhere
-$ path/to/pokemon
+$ path/to/pokemon-go
 
 # add alias(write to `~/.bashrc` or `~/.zshrc`)
-alias pokemon-go="/path/to/pokemon"
+alias pokemon-go="/path/to/pokemon-go"
 # or rewrite ls, cd
-alias ls="/path/to/pokemon"
-cd(){builtin cd "$@" && /path/to/pokemon}
+alias ls="/path/to/pokemon-go"
+cd(){builtin cd "$@" && /path/to/pokemon-go}
 ```
