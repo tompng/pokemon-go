@@ -4,7 +4,7 @@ ruby version: [tompng/pokemon-ruby](https://github.com/tompng/pokemon-ruby)
 
 ## Pokemons are hiding in your local directory
 ```
-$ go build -o pokemon-go pokemon.go; cd somewhere; path/to/pokemon-go
+$ go build -o pokemongo pokemon.go; cd somewhere; path/to/pokemongo
                                                   MQBTm             uuuu        
                             .,,.   ,.    ...      MY111         ,,@TmdddB       
   gMTTT                    pT**"   T*    *TM1      m11j7*~~~:?V::TTMQQQT     ,  
@@ -106,21 +106,21 @@ $ cat pokemon.txt
 # if you skip this step, only gopher will appear.
 
 # Build
-$ go build -o pokemon-go pokemon.go
+$ go build -o pokemongo pokemon.go
 
 # Find pokemon! Type Enter to catch them!
-$ ./pokemon-go
+$ ./pokemongo
 
 # Pokemon you caught will stay inside `./pokemon.txt`
 $ cat pokemon.txt
 
 # Change directory, and you will find another pokemon!
 $ cd somewhere
-$ path/to/pokemon-go
+$ path/to/pokemongo
 
 # add alias(write to `~/.bashrc` or `~/.zshrc`)
-alias pokemon-go="/path/to/pokemon-go"
+alias pokemongo="/path/to/pokemongo"
 # or rewrite ls, cd
-alias ls="/path/to/pokemon-go"
-cd(){builtin cd "$@" && /path/to/pokemon-go}
+alias ls="/path/to/pokemongo"
+cd(){builtin cd "$@" && /path/to/pokemongo}
 ```
