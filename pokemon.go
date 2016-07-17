@@ -130,7 +130,7 @@ func Save(pokemon canvas.Image) {
 	screen := canvas.NewImageBuffer(80, 80)
 	screen.Draw(pokemon, 0, 0, 80, 80)
 	DrawGotcha(screen)
-	ioutil.WriteFile("pokemon.txt", []byte(screen.String()), os.ModePerm)
+	ioutil.WriteFile("pokemon.txt", []byte(screen.String()), 0666)
 }
 
 func main() {
