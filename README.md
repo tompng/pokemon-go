@@ -1,5 +1,7 @@
 # Pokemon-Go
 
+ruby version: [tompng/pokemon-ruby](https://github.com/tompng/pokemon-ruby)
+
 ## Pokemons are hiding in your local directory
 ```
 $ go build -o pokemon-go pokemon.go; cd somewhere; path/to/pokemon-go
