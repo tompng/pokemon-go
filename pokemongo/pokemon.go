@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	tty "github.com/mattn/go-tty"
@@ -56,10 +57,9 @@ func PokemonImage() *canvas.ImageBuffer {
 	}
 	var imageFiles []string
 	for _, f := range pokemongo.AssetNames() {
-		if path.Ext(f) != ".png" {
-			continue
+		if strings.HasPrefix(f, "images/pokemon/") && path.Ext(f) == ".png" {
+			imageFiles = append(imageFiles, f)
 		}
-		imageFiles = append(imageFiles, f)
 	}
 	random := rand.New(rand.NewSource(seed))
 	f := imageFiles[random.Intn(len(imageFiles))]
