@@ -1,30 +1,36 @@
 package main
 
 import (
-	"./canvas"
+	"go/build"
 	"io/ioutil"
 	"math"
 	"math/rand"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
 	"unsafe"
+
+	"github.com/tompng/pokemon-go/canvas"
 )
 
 var resourceDir string
 
 func ResourceDir() string {
-	dir, err := filepath.Abs(path.Dir(os.Args[0]))
-	_, err = os.Stat(dir + "/images/chars.png")
+	dirs := build.Default.SrcDirs()
+	if len(dirs) < 2 {
+		panic("GOPATH is not defined")
+	}
+	dir := dirs[1]
+	chars := filepath.Join(dir, "images/chars.png")
+	_, err := os.Stat(chars)
 	if err == nil {
-		return dir + "/images/"
+		return filepath.Join(dir, "images")
 	}
 	_, err = os.Stat("images/chars.png")
 	if err == nil {
-		return "images/"
+		return "images"
 	}
 	panic("unable to find resource directory")
 }
@@ -32,7 +38,7 @@ func ResourcePath(path string) string {
 	if len(resourceDir) == 0 {
 		resourceDir = ResourceDir()
 	}
-	return resourceDir + path
+	return filepath.Join(resourceDir, path)
 }
 
 var fontData *canvas.ImageBuffer
@@ -68,7 +74,7 @@ func PokemonImage() *canvas.ImageBuffer {
 	if err != nil {
 		panic("cannot get current path")
 	}
-	path := ResourcePath("pokemon/")
+	path := ResourcePath("pokemon")
 	allFiles := FileNames(path)
 	imageFiles := make([]string, len(allFiles))
 	imageNum := 0
@@ -84,7 +90,7 @@ func PokemonImage() *canvas.ImageBuffer {
 	}
 	random := rand.New(rand.NewSource(seed))
 	file := imageFiles[random.Intn(imageNum)]
-	return canvas.NewImageBufferFromFile(path + file)
+	return canvas.NewImageBufferFromFile(filepath.Join(path, file))
 }
 
 func DrawScrollingMessages(screen *canvas.ImageBuffer, messages []string, time float64) {
@@ -130,7 +136,10 @@ func Save(pokemon canvas.Image) {
 	screen := canvas.NewImageBuffer(80, 80)
 	screen.Draw(pokemon, 0, 0, 80, 80)
 	DrawGotcha(screen)
-	ioutil.WriteFile("pokemon.txt", []byte(screen.String()), 0666)
+	err := ioutil.WriteFile("pokemon.txt", []byte(screen.String()), 0666)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func main() {
