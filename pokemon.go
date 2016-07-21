@@ -1,7 +1,6 @@
 package main
 
 import (
-	"./canvas"
 	"io/ioutil"
 	"math"
 	"math/rand"
@@ -12,6 +11,8 @@ import (
 	"syscall"
 	"time"
 	"unsafe"
+
+	"github.com/tompng/pokemon-go/canvas"
 )
 
 var resourceDir string
