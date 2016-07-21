@@ -10,6 +10,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
+	"strings"
 	"time"
 
 	tty "github.com/mattn/go-tty"
@@ -56,11 +58,11 @@ func PokemonImage() *canvas.ImageBuffer {
 	}
 	var imageFiles []string
 	for _, f := range pokemongo.AssetNames() {
-		if path.Ext(f) != ".png" {
-			continue
+		if strings.HasPrefix(f, "images/pokemon/") && path.Ext(f) == ".png" {
+			imageFiles = append(imageFiles, f)
 		}
-		imageFiles = append(imageFiles, f)
 	}
+	sort.Strings(imageFiles)
 	random := rand.New(rand.NewSource(seed))
 	f := imageFiles[random.Intn(len(imageFiles))]
 	return canvas.NewImageBufferFromReader(file(f))
@@ -137,13 +139,18 @@ func main() {
 	dx1, dy1 := 2*rand.Float64()-1, 2*rand.Float64()-1
 	dx2, dy2 := 2*rand.Float64()-1, 2*rand.Float64()-1
 	getTime := 20.0
+	exitFlag := false
 	currentTime := func() float64 {
 		return float64(time.Now().UnixNano()-time0) / 1000 / 1000 / 1000
 	}
 
 	go func() {
 		for {
-			tty.ReadRune()
+			code, _ := tty.ReadRune()
+			if code == 0x03 || code == 0x1C {
+				exitFlag = true
+				continue
+			}
 			time := currentTime()
 			if time < 2.0 {
 				time = 2.0
@@ -153,7 +160,6 @@ func main() {
 			}
 		}
 	}()
-
 	throwTime := 1.0
 	for {
 		terminalWidth, terminalHeight, err := tty.Size()
@@ -202,6 +208,9 @@ func main() {
 			}
 		}
 		screen.Print()
+		if exitFlag {
+			break
+		}
 		time.Sleep(50 * time.Millisecond)
 	}
 
