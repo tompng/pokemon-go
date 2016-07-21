@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -61,6 +62,7 @@ func PokemonImage() *canvas.ImageBuffer {
 			imageFiles = append(imageFiles, f)
 		}
 	}
+	sort.Strings(imageFiles)
 	random := rand.New(rand.NewSource(seed))
 	f := imageFiles[random.Intn(len(imageFiles))]
 	return canvas.NewImageBufferFromReader(file(f))
