@@ -10,10 +10,9 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"syscall"
 	"time"
-	"unsafe"
 
+	tty "github.com/mattn/go-tty"
 	"github.com/tompng/pokemon-go/canvas"
 )
 
@@ -56,9 +55,6 @@ func PokemonImage() *canvas.ImageBuffer {
 	}
 	var imageFiles []string
 	for _, f := range AssetNames() {
-		if path.Dir(f) != "images" {
-			continue
-		}
 		if path.Ext(f) != ".png" {
 			continue
 		}
@@ -99,15 +95,6 @@ func DrawGotcha(screen *canvas.ImageBuffer) {
 	DrawString(screen, message, float64(screen.Width-width)/2, float64(screen.Height-height), float64(height))
 }
 
-func GetWinSize() (int, int) {
-	type WinSize struct {
-		H, W, _, _ int16
-	}
-	winsize := &WinSize{}
-	syscall.Syscall(syscall.SYS_IOCTL, os.Stdout.Fd(), uintptr(syscall.TIOCGWINSZ), uintptr(unsafe.Pointer(winsize)))
-	return int(winsize.W), int(winsize.H)
-}
-
 func Save(pokemon canvas.Image) {
 	screen := canvas.NewImageBuffer(80, 80)
 	screen.Draw(pokemon, 0, 0, 80, 80)
@@ -129,6 +116,11 @@ func file(n string) io.Reader {
 }
 
 func main() {
+	tty, err := tty.Open()
+	if err != nil {
+		fatal(err)
+	}
+
 	ball1 := canvas.NewImageBufferFromReader(file("images/ball1.png"))
 	smoke := canvas.NewImageBufferFromReader(file("images/smoke.png"))
 	ball2 := canvas.NewImageBufferFromReader(file("images/ball2.png"))
@@ -163,7 +155,10 @@ func main() {
 
 	throwTime := 1.0
 	for {
-		terminalWidth, terminalHeight := GetWinSize()
+		terminalWidth, terminalHeight, err := tty.Size()
+		if err != nil {
+			fatal(err)
+		}
 		t := currentTime()
 		screen := canvas.NewImageBuffer(terminalWidth, (terminalHeight-1)*2)
 
