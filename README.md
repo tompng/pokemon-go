@@ -1,7 +1,5 @@
 # Pokemon-Go
 
-ruby version: [tompng/pokemon-ruby](https://github.com/tompng/pokemon-ruby)
-
 ## Pokemons are hiding in your local directory
 ```
 $ go build -o pokemongo pokemon.go; cd somewhere; path/to/pokemongo
@@ -102,17 +100,16 @@ $ cat pokemon.txt
 
 ## How to use
 ```shell
-# Search for `pokemon sprite` images(png) and place it to `images/pokemon/`
-# if you skip this step, only gopher will appear.
-
-# Build
+# Install
 $ go get github.com/tompng/pokemon-go/pokemongo
 
-# Rebuild with updating images
+# Add pokemon images
+# Search for `pokemon sprite` images(png), place it to `images/pokemon/`, and rebuild with the following command
 $ go-bindata -pkg pokemongo images images/pokemon
 $ cd pokemongo && go install
+# If you skip this step, only gopher will appear
 
-# Find pokemon! Type Enter to catch them!
+# Find pokemon! Type any key to catch them!
 $ /path/to/gopath/bin/pokemongo
 
 # Pokemon you caught will stay inside `./pokemon.txt`
@@ -120,11 +117,9 @@ $ cat pokemon.txt
 
 # Change directory, and you will find another pokemon!
 $ cd somewhere
-$ path/to/pokemongo
+$ /path/to/gopath/bin/pokemongo
 
-# add alias(write to `~/.bashrc` or `~/.zshrc`)
-alias pokemongo="/path/to/pokemongo"
-# or rewrite ls, cd
-alias ls="/path/to/pokemongo"
+# Rewrite ls, cd if you want
+alias ls="/path/to/gopath/bin/pokemongo"
 cd(){builtin cd "$@" && /path/to/gopath/bin/pokemongo}
 ```
