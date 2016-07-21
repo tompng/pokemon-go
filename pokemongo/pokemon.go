@@ -1,45 +1,27 @@
 package main
 
 import (
-	"./canvas"
+	"bytes"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"math"
 	"math/rand"
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
-	"syscall"
 	"time"
-	"unsafe"
+
+	tty "github.com/mattn/go-tty"
+	"github.com/tompng/pokemon-go"
+	"github.com/tompng/pokemon-go/canvas"
 )
-
-var resourceDir string
-
-func ResourceDir() string {
-	dir, err := filepath.Abs(path.Dir(os.Args[0]))
-	_, err = os.Stat(dir + "/images/chars.png")
-	if err == nil {
-		return dir + "/images/"
-	}
-	_, err = os.Stat("images/chars.png")
-	if err == nil {
-		return "images/"
-	}
-	panic("unable to find resource directory")
-}
-func ResourcePath(path string) string {
-	if len(resourceDir) == 0 {
-		resourceDir = ResourceDir()
-	}
-	return resourceDir + path
-}
 
 var fontData *canvas.ImageBuffer
 
 func DrawString(screen *canvas.ImageBuffer, message string, x, y, size float64) {
 	if fontData == nil {
-		fontData = canvas.NewImageBufferFromFile(ResourcePath("chars.png"))
+		fontData = canvas.NewImageBufferFromReader(file("images/chars.png"))
 	}
 	for i, c := range message {
 		face := fontData.Sub(float64(c%16)/16.0, float64(c/16)/8.0, 1/16.0, 1/8.0)
@@ -68,23 +50,20 @@ func PokemonImage() *canvas.ImageBuffer {
 	if err != nil {
 		panic("cannot get current path")
 	}
-	path := ResourcePath("pokemon/")
-	allFiles := FileNames(path)
-	imageFiles := make([]string, len(allFiles))
-	imageNum := 0
-	for _, file := range allFiles {
-		if strings.HasSuffix(file, ".png") {
-			imageFiles[imageNum] = file
-			imageNum++
-		}
-	}
 	var seed int64
 	for i, c := range currentPath {
 		seed = seed*0x987654321 + int64(c) + int64(i)
 	}
+	var imageFiles []string
+	for _, f := range pokemongo.AssetNames() {
+		if path.Ext(f) != ".png" {
+			continue
+		}
+		imageFiles = append(imageFiles, f)
+	}
 	random := rand.New(rand.NewSource(seed))
-	file := imageFiles[random.Intn(imageNum)]
-	return canvas.NewImageBufferFromFile(path + file)
+	f := imageFiles[random.Intn(len(imageFiles))]
+	return canvas.NewImageBufferFromReader(file(f))
 }
 
 func DrawScrollingMessages(screen *canvas.ImageBuffer, messages []string, time float64) {
@@ -117,15 +96,6 @@ func DrawGotcha(screen *canvas.ImageBuffer) {
 	DrawString(screen, message, float64(screen.Width-width)/2, float64(screen.Height-height), float64(height))
 }
 
-func GetWinSize() (int, int) {
-	type WinSize struct {
-		H, W, _, _ int16
-	}
-	winsize := &WinSize{}
-	syscall.Syscall(syscall.SYS_IOCTL, os.Stdout.Fd(), uintptr(syscall.TIOCGWINSZ), uintptr(unsafe.Pointer(winsize)))
-	return int(winsize.W), int(winsize.H)
-}
-
 func Save(pokemon canvas.Image) {
 	screen := canvas.NewImageBuffer(80, 80)
 	screen.Draw(pokemon, 0, 0, 80, 80)
@@ -133,11 +103,29 @@ func Save(pokemon canvas.Image) {
 	ioutil.WriteFile("pokemon.txt", []byte(screen.String()), 0666)
 }
 
+func fatal(err error) {
+	fmt.Fprintf(os.Stderr, "%v: %v", os.Args[0], err)
+	os.Exit(1)
+}
+
+func file(n string) io.Reader {
+	b, err := pokemongo.Asset(n)
+	if err != nil {
+		panic(err.Error())
+	}
+	return bytes.NewReader(b)
+}
+
 func main() {
-	ball1 := canvas.NewImageBufferFromFile(ResourcePath("ball1.png"))
-	smoke := canvas.NewImageBufferFromFile(ResourcePath("smoke.png"))
-	ball2 := canvas.NewImageBufferFromFile(ResourcePath("ball2.png"))
-	ball3 := canvas.NewImageBufferFromFile(ResourcePath("ball3.png"))
+	tty, err := tty.Open()
+	if err != nil {
+		fatal(err)
+	}
+
+	ball1 := canvas.NewImageBufferFromReader(file("images/ball1.png"))
+	smoke := canvas.NewImageBufferFromReader(file("images/smoke.png"))
+	ball2 := canvas.NewImageBufferFromReader(file("images/ball2.png"))
+	ball3 := canvas.NewImageBufferFromReader(file("images/ball3.png"))
 
 	fileNames := FileNames(".")
 	pokemon := PokemonImage()
@@ -155,7 +143,7 @@ func main() {
 
 	go func() {
 		for {
-			os.Stdin.Read(make([]byte, 1))
+			tty.ReadRune()
 			time := currentTime()
 			if time < 2.0 {
 				time = 2.0
@@ -168,7 +156,10 @@ func main() {
 
 	throwTime := 1.0
 	for {
-		terminalWidth, terminalHeight := GetWinSize()
+		terminalWidth, terminalHeight, err := tty.Size()
+		if err != nil {
+			fatal(err)
+		}
 		t := currentTime()
 		screen := canvas.NewImageBuffer(terminalWidth, (terminalHeight-1)*2)
 

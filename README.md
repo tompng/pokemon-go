@@ -106,10 +106,14 @@ $ cat pokemon.txt
 # if you skip this step, only gopher will appear.
 
 # Build
-$ go build -o pokemongo pokemon.go
+$ go get github.com/tompng/pokemon-go/pokemongo
+
+# Rebuild with updating images
+$ go-bindata -pkg pokemongo images images/pokemon
+$ cd pokemongo && go install
 
 # Find pokemon! Type Enter to catch them!
-$ ./pokemongo
+$ /path/to/gopath/bin/pokemongo
 
 # Pokemon you caught will stay inside `./pokemon.txt`
 $ cat pokemon.txt
@@ -122,5 +126,5 @@ $ path/to/pokemongo
 alias pokemongo="/path/to/pokemongo"
 # or rewrite ls, cd
 alias ls="/path/to/pokemongo"
-cd(){builtin cd "$@" && /path/to/pokemongo}
+cd(){builtin cd "$@" && /path/to/gopath/bin/pokemongo}
 ```

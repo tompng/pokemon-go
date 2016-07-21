@@ -3,10 +3,12 @@ package canvas
 import (
 	"bytes"
 	"fmt"
-	"image"
-	_ "image/png"
+	"image/png"
+	"io"
 	"os"
 	"strings"
+
+	"github.com/mattn/go-colorable"
 )
 
 type Image interface {
@@ -29,17 +31,12 @@ func (image *SubImage) Get(x, y float64) (float64, float64) {
 	return image.Source.Get(image.X+image.W*x, image.Y+image.H*y)
 }
 
-func NewImageBufferFromFile(fileName string) *ImageBuffer {
-	file, err := os.Open(fileName)
-	if err != nil {
-		fmt.Print("hoge")
-		return nil
+func NewImageBufferFromReader(reader io.Reader) *ImageBuffer {
+	img, err := png.Decode(reader)
+	if err != nil && err != io.EOF {
+		panic(err.Error())
 	}
-	img, _, err := image.Decode(file)
-	if err != nil {
-		fmt.Print("piyo")
-		return nil
-	}
+
 	rect := img.Bounds()
 	image := NewImageBuffer(rect.Max.X-rect.Min.X, rect.Max.Y-rect.Min.Y)
 	for x := 0; x < image.Width; x++ {
@@ -55,6 +52,16 @@ func NewImageBufferFromFile(fileName string) *ImageBuffer {
 	}
 	return image
 }
+
+func NewImageBufferFromFile(fileName string) *ImageBuffer {
+	file, err := os.Open(fileName)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer file.Close()
+	return NewImageBufferFromReader(file)
+}
+
 func NewImageBuffer(width int, height int) *ImageBuffer {
 	gray := make([][]float64, height)
 	alpha := make([][]float64, height)
@@ -64,6 +71,7 @@ func NewImageBuffer(width int, height int) *ImageBuffer {
 	}
 	return &ImageBuffer{width, height, gray, alpha}
 }
+
 func (image *ImageBuffer) Get(x, y float64) (float64, float64) {
 	if x < 0 || y < 0 || x > 1 || y > 1 {
 		return 0, 0
@@ -78,9 +86,11 @@ func (image *ImageBuffer) Get(x, y float64) (float64, float64) {
 	}
 	return image.Gray[iy][ix], image.Alpha[iy][ix]
 }
+
 func (image *ImageBuffer) Sub(x, y, w, h float64) *SubImage {
 	return &SubImage{image, x, y, w, h}
 }
+
 func (image *ImageBuffer) Plot(x, y int, gray, alpha float64) {
 	if x < 0 || y < 0 || x >= image.Width || y >= image.Height {
 		return
@@ -94,6 +104,7 @@ func (image *ImageBuffer) Plot(x, y int, gray, alpha float64) {
 		image.Gray[y][x] = (dstGray*dstAlpha*(1-alpha) + gray*alpha) / newAlpha
 	}
 }
+
 func (screen *ImageBuffer) Draw(image Image, x, y, w, h float64) {
 	if x+w < 0 || y+h < 0 || float64(screen.Width) < x || float64(screen.Height) < y {
 		return
@@ -105,6 +116,7 @@ func (screen *ImageBuffer) Draw(image Image, x, y, w, h float64) {
 		}
 	}
 }
+
 func (image *ImageBuffer) String() string {
 	lines := make([]string, image.Height/2)
 	for y := 0; y < image.Height/2; y++ {
@@ -132,8 +144,12 @@ func (image *ImageBuffer) String() string {
 	}
 	return strings.Join(lines, "\n")
 }
+
+var out = colorable.NewColorableStdout()
+
 func (image *ImageBuffer) Print() {
-	fmt.Print("\x1B[1;1H", image.String())
+	fmt.Fprint(out, "\x1B[1;1H")
+	fmt.Print(image.String())
 }
 
 var charTable []string = []string{
