@@ -142,7 +142,7 @@ func main() {
 
 	go func() {
 		for {
-			os.Stdin.Read(make([]byte, 1))
+			tty.ReadRune()
 			time := currentTime()
 			if time < 2.0 {
 				time = 2.0
