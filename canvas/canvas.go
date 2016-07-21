@@ -7,6 +7,8 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/mattn/go-colorable"
 )
 
 type Image interface {
@@ -143,8 +145,11 @@ func (image *ImageBuffer) String() string {
 	return strings.Join(lines, "\n")
 }
 
+var out = colorable.NewColorableStdout()
+
 func (image *ImageBuffer) Print() {
-	fmt.Print("\x1B[1;1H", image.String())
+	fmt.Fprint(out, "\x1B[1;1H")
+	fmt.Print(image.String())
 }
 
 var charTable []string = []string{
