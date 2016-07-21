@@ -32,13 +32,11 @@ func (image *SubImage) Get(x, y float64) (float64, float64) {
 func NewImageBufferFromFile(fileName string) *ImageBuffer {
 	file, err := os.Open(fileName)
 	if err != nil {
-		fmt.Print("hoge")
-		return nil
+		panic(err)
 	}
 	img, _, err := image.Decode(file)
 	if err != nil {
-		fmt.Print("piyo")
-		return nil
+		panic(err)
 	}
 	rect := img.Bounds()
 	image := NewImageBuffer(rect.Max.X-rect.Min.X, rect.Max.Y-rect.Min.Y)
