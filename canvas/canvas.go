@@ -55,6 +55,7 @@ func NewImageBufferFromFile(fileName string) *ImageBuffer {
 	}
 	return image
 }
+
 func NewImageBuffer(width int, height int) *ImageBuffer {
 	gray := make([][]float64, height)
 	alpha := make([][]float64, height)
@@ -64,6 +65,7 @@ func NewImageBuffer(width int, height int) *ImageBuffer {
 	}
 	return &ImageBuffer{width, height, gray, alpha}
 }
+
 func (image *ImageBuffer) Get(x, y float64) (float64, float64) {
 	if x < 0 || y < 0 || x > 1 || y > 1 {
 		return 0, 0
@@ -78,9 +80,11 @@ func (image *ImageBuffer) Get(x, y float64) (float64, float64) {
 	}
 	return image.Gray[iy][ix], image.Alpha[iy][ix]
 }
+
 func (image *ImageBuffer) Sub(x, y, w, h float64) *SubImage {
 	return &SubImage{image, x, y, w, h}
 }
+
 func (image *ImageBuffer) Plot(x, y int, gray, alpha float64) {
 	if x < 0 || y < 0 || x >= image.Width || y >= image.Height {
 		return
@@ -94,6 +98,7 @@ func (image *ImageBuffer) Plot(x, y int, gray, alpha float64) {
 		image.Gray[y][x] = (dstGray*dstAlpha*(1-alpha) + gray*alpha) / newAlpha
 	}
 }
+
 func (screen *ImageBuffer) Draw(image Image, x, y, w, h float64) {
 	if x+w < 0 || y+h < 0 || float64(screen.Width) < x || float64(screen.Height) < y {
 		return
@@ -105,6 +110,7 @@ func (screen *ImageBuffer) Draw(image Image, x, y, w, h float64) {
 		}
 	}
 }
+
 func (image *ImageBuffer) String() string {
 	lines := make([]string, image.Height/2)
 	for y := 0; y < image.Height/2; y++ {
@@ -132,6 +138,7 @@ func (image *ImageBuffer) String() string {
 	}
 	return strings.Join(lines, "\n")
 }
+
 func (image *ImageBuffer) Print() {
 	fmt.Print("\x1B[1;1H", image.String())
 }
