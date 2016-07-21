@@ -3,8 +3,8 @@ package canvas
 import (
 	"bytes"
 	"fmt"
-	"image"
-	_ "image/png"
+	"image/png"
+	"io"
 	"os"
 	"strings"
 )
@@ -29,17 +29,12 @@ func (image *SubImage) Get(x, y float64) (float64, float64) {
 	return image.Source.Get(image.X+image.W*x, image.Y+image.H*y)
 }
 
-func NewImageBufferFromFile(fileName string) *ImageBuffer {
-	file, err := os.Open(fileName)
-	if err != nil {
-		fmt.Print("hoge")
-		return nil
+func NewImageBufferFromReader(reader io.Reader) *ImageBuffer {
+	img, err := png.Decode(reader)
+	if err != nil && err != io.EOF {
+		panic(err.Error())
 	}
-	img, _, err := image.Decode(file)
-	if err != nil {
-		fmt.Print("piyo")
-		return nil
-	}
+
 	rect := img.Bounds()
 	image := NewImageBuffer(rect.Max.X-rect.Min.X, rect.Max.Y-rect.Min.Y)
 	for x := 0; x < image.Width; x++ {
@@ -54,6 +49,15 @@ func NewImageBufferFromFile(fileName string) *ImageBuffer {
 		}
 	}
 	return image
+}
+
+func NewImageBufferFromFile(fileName string) *ImageBuffer {
+	file, err := os.Open(fileName)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer file.Close()
+	return NewImageBufferFromReader(file)
 }
 
 func NewImageBuffer(width int, height int) *ImageBuffer {
