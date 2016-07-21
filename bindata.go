@@ -10,7 +10,7 @@
 // images/pokemon/gopher.png
 // DO NOT EDIT!
 
-package main
+package pokemongo
 
 import (
 	"bytes"
