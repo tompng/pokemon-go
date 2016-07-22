@@ -101,25 +101,24 @@ $ cat pokemon.txt
 ## How to use
 ```shell
 # Install
-$ go get github.com/tompng/pokemon-go/pokemongo
+$ go get github.com/tompng/pokemon-go
 
-# Add pokemon images
-# Search for `pokemon sprite` images(png), place it to `images/pokemon/`, and rebuild with the following command
-$ go-bindata -pkg pokemongo images images/pokemon
-$ cd pokemongo && go install
+# Add pokemon images(png) to `images/pokemon/` and rebuild
 # If you skip this step, only gopher will appear
+$ go generate
+$ go install
 
 # Find pokemon! Type any key to catch them!
-$ /path/to/gopath/bin/pokemongo
+$ /path/to/gopath/bin/pokemon-go
 
 # Pokemon you caught will stay inside `./pokemon.txt`
 $ cat pokemon.txt
 
 # Change directory, and you will find another pokemon!
 $ cd somewhere
-$ /path/to/gopath/bin/pokemongo
+$ /path/to/gopath/bin/pokemon-go
 
-# Rewrite ls, cd if you want
-alias ls="/path/to/gopath/bin/pokemongo"
-cd(){builtin cd "$@" && /path/to/gopath/bin/pokemongo}
+# Rewrite `ls` or `cd` if you want
+alias ls="/path/to/gopath/bin/pokemon-go"
+cd(){builtin cd "$@" && /path/to/gopath/bin/pokemon-go}
 ```
