@@ -103,7 +103,7 @@ $ cat pokemon.txt
 # Install
 $ go get github.com/tompng/pokemon-go
 
-# Add pokemon images(png) to images/pokemon/ and rebuild
+# Add pokemon images(png) to `images/pokemon/` and rebuild
 # If you skip this step, only gopher will appear
 $ go generate
 $ go install
@@ -118,7 +118,7 @@ $ cat pokemon.txt
 $ cd somewhere
 $ /path/to/gopath/bin/pokemon-go
 
-# Rewrite ls, cd if you want
+# Rewrite `ls` or `cd` if you want
 alias ls="/path/to/gopath/bin/pokemon-go"
 cd(){builtin cd "$@" && /path/to/gopath/bin/pokemon-go}
 ```
