@@ -10,7 +10,7 @@
 // images/pokemon/gopher.png
 // DO NOT EDIT!
 
-package pokemongo
+package main
 
 import (
 	"bytes"
@@ -397,4 +397,3 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-

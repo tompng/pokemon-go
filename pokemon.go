@@ -1,5 +1,7 @@
 package main
 
+//go:generate go-bindata images images/pokemon
+
 import (
 	"bytes"
 	"fmt"
@@ -15,7 +17,6 @@ import (
 	"time"
 
 	tty "github.com/mattn/go-tty"
-	"github.com/tompng/pokemon-go"
 	"github.com/tompng/pokemon-go/canvas"
 )
 
@@ -57,7 +58,7 @@ func PokemonImage() *canvas.ImageBuffer {
 		seed = seed*0x987654321 + int64(c) + int64(i)
 	}
 	var imageFiles []string
-	for _, f := range pokemongo.AssetNames() {
+	for _, f := range AssetNames() {
 		if strings.HasPrefix(f, "images/pokemon/") && path.Ext(f) == ".png" {
 			imageFiles = append(imageFiles, f)
 		}
@@ -111,7 +112,7 @@ func fatal(err error) {
 }
 
 func file(n string) io.Reader {
-	b, err := pokemongo.Asset(n)
+	b, err := Asset(n)
 	if err != nil {
 		panic(err.Error())
 	}
